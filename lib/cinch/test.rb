@@ -41,9 +41,8 @@ module Cinch
         # override the message-parsing stuff
         super(nil, bot)
         @message = msg
-        @user = opts.delete(:user) {
-          @bot.user_list.find_ensured(nil, 'test', nil)
-        }
+        nick = opts.delete(:nick) { 'test' }
+        @bot.user_list.find_ensured(nil, nick, nil)
 
         @channel = opts.delete(:channel) { nil }
       end
