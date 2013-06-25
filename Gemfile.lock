@@ -1,13 +1,13 @@
 PATH
   remote: .
   specs:
-    cinch-test (0.0.1)
+    cinch-test (0.0.2)
       cinch
 
 GEM
   remote: http://rubygems.org/
   specs:
-    cinch (2.0.4)
+    cinch (2.0.5)
     columnize (0.3.6)
     debugger (1.5.0)
       columnize (>= 0.3.1)

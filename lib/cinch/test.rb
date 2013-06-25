@@ -85,6 +85,7 @@ module Cinch
 
       (class << message; self; end).class_eval do
         define_method :reply do |r, prefix = false|
+          r.insert(0, 'nick: ') if prefix
           mutex.synchronize { replies << r }
         end
       end
