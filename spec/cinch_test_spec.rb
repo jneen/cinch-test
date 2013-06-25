@@ -49,7 +49,7 @@ describe Cinch::Test do
 
     it 'messages a test bot' do
       replies = get_replies(message)
-      assert { replies == ['nick: baz reply'] }
+      assert { replies == ['test: baz reply'] }
     end
   end
 end
