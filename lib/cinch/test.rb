@@ -48,7 +48,7 @@ module Cinch
       end
     end
 
-    def make_bot(plugin, opts, &b)
+    def make_bot(plugin, opts = {}, &b)
       MockBot.new do
         configure do |c|
           c.nick = 'testbot'
