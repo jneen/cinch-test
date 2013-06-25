@@ -84,7 +84,7 @@ module Cinch
       replies = []
 
       (class << message; self; end).class_eval do
-        define_method :reply do |r|
+        define_method :reply do |r, prefix = false|
           mutex.synchronize { replies << r }
         end
       end
