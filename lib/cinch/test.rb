@@ -41,8 +41,8 @@ module Cinch
         # override the message-parsing stuff
         super(nil, bot)
         @message = msg
-        nick = opts.delete(:nick) { 'test' }
-        @bot.user_list.find_ensured(nil, nick, nil)
+        @user = Cinch::User.new(opts.delete(:nick) { 'test' }, bot)
+        @bot.user_list.find_ensured(nil, @user.nick, nil)
 
         @channel = opts.delete(:channel) { nil }
       end
@@ -85,7 +85,7 @@ module Cinch
 
       (class << message; self; end).class_eval do
         define_method :reply do |r, prefix = false|
-          r.insert(0, 'nick: ') if prefix
+          r = [self.user.nick, r].join(': ') if prefix
           mutex.synchronize { replies << r }
         end
       end
