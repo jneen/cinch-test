@@ -42,9 +42,9 @@ module Cinch
         super(nil, bot)
         @message = msg
         @user = Cinch::User.new(opts.delete(:nick) { 'test' }, bot)
-        @bot.user_list.find_ensured(nil, @user.nick, nil)
+        @channel = Cinch::Channel.new(opts.delete(:channel), bot) if opts.key?(:channel)
 
-        @channel = opts.delete(:channel) { nil }
+        @bot.user_list.find_ensured(nil, @user.nick, nil)
       end
     end
 
@@ -53,7 +53,7 @@ module Cinch
         configure do |c|
           c.nick = 'testbot'
           c.server = nil
-          c.channels = []
+          c.channels = ['foo']
           c.plugins.plugins = [plugin]
           c.plugins.options[plugin] = opts
           c.reconnect = false
@@ -67,9 +67,21 @@ module Cinch
       MockMessage.new(text, bot, opts)
     end
 
-    def send_message(message, event=:message)
+    def send_message(message, event = :message)
       handlers = message.bot.handlers
-      handlers.dispatch(event, message)
+
+      # Deal with secondary event types
+      # See http://rubydoc.info/github/cinchrb/cinch/file/docs/events.md
+      events = [:catchall, event]
+
+      # If the message has a channel add the :channel event
+      events << :channel unless message.channel.nil?
+
+      # If the message is :private also trigger :message
+      events << :message if events.include?(:private)
+
+      # Dispatch each of the events to the handlers
+      events.each { |e| handlers.dispatch(e, message) }
 
       # join all of the freaking threads, like seriously
       # why is there no option to dispatch synchronously
