@@ -2,26 +2,35 @@ describe Cinch::Test do
   class MyPlugin
     include Cinch::Plugin
 
-    match /foo/, :method => :foo
-    match /bar/, :method => :bar
-    match /baz/, :method => :baz
-
     attr_reader :foo
     def initialize(*)
       super
       @foo = config[:foo]
     end
 
+    match /foo/, :method => :foo
     def foo(m)
       m.reply "foo: #{@foo}"
     end
 
+    match /bar/, :method => :bar
     def bar(m)
       m.reply 'bar reply'
     end
 
+    match /baz/, :method => :baz
     def baz(m)
       m.reply 'baz reply', true
+    end
+
+    listen_to :channel
+    def listen(m)
+      m.reply 'I listen'
+    end
+
+    match /trout/, :method => :action, :react_on => :action
+    def action(m)
+      m.reply 'I hate fish'
     end
   end
 
@@ -59,6 +68,15 @@ describe Cinch::Test do
     it 'messages a test bot and gets a prefixed reply' do
       replies = get_replies(message)
       assert { replies == ['test: baz reply'] }
+    end
+  end
+
+  describe 'listeners' do
+    let(:message) { make_message(bot, 'blah blah blah', :channel => 'test') }
+
+    it 'messages a test bot and gets a prefixed reply' do
+      replies = get_replies(message)
+      assert { replies == ['I listen'] }
     end
   end
 end
