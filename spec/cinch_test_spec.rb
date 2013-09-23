@@ -32,6 +32,11 @@ describe Cinch::Test do
     def action(m)
       m.reply 'I hate fish'
     end
+
+    match /scallops/, :method => :shellfish
+    def shellfish(m)
+      m.action_reply 'loves shellfish'
+    end
   end
 
   include Cinch::Test
@@ -68,6 +73,15 @@ describe Cinch::Test do
     it 'messages a test bot and gets a prefixed reply' do
       replies = get_replies(message)
       assert { replies == ['test: baz reply'] }
+    end
+  end
+
+  describe '#make_message with action_reply' do
+    let(:message) { make_message(bot, '!scallops') }
+
+    it 'messages a test bot and gets an action' do
+      replies = get_replies(message)
+      assert { replies == ['loves shellfish'] }
     end
   end
 
