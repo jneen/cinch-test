@@ -23,6 +23,8 @@ module Cinch
     end
 
     class MockBot < Cinch::Bot
+      attr_accessor :mask
+
       def initialize(*)
         super
         @irc = MockIRC.new(self)
@@ -33,6 +35,9 @@ module Cinch
         # overrides @irc and calls @irc.start, which does
         # network i/o. :(
         @plugins.register_plugins(@config.plugins.plugins)
+
+        # set the bot's hostmask
+        @mask = 'foo!bar@baz'
       end
     end
 
@@ -43,6 +48,9 @@ module Cinch
         @message = msg
         @user = Cinch::User.new(opts.delete(:nick) { 'test' }, bot)
         @channel = Cinch::Channel.new(opts.delete(:channel), bot) if opts.key?(:channel)
+
+        # set the message target
+        @target = @channel || @user
 
         @bot.user_list.find_ensured(nil, @user.nick, nil)
       end
@@ -96,9 +104,19 @@ module Cinch
       replies = []
 
       (class << message; self; end).class_eval do
-        define_method :reply do |r, prefix = false|
-          r = [self.user.nick, r].join(': ') if prefix
-          mutex.synchronize { replies << r }
+        [ :reply, :safe_reply ].each do |name|
+          define_method name do |r, prefix = false|
+            r = [self.user.nick, r].join(': ') if prefix
+            r = Cinch::Utilities::String.filter_string(r) if name == :safe_reply
+            mutex.synchronize { replies << r }
+          end
+        end
+
+        [ :action_reply, :safe_action_reply ].each do |name|
+          define_method name do |r|
+            r = Cinch::Utilities::String.filter_string(r) if name == :safe_action_reply
+            mutex.synchronize { replies << r }
+          end
         end
       end
 
